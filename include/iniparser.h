@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include "buffer.h"
 /*
  * The following #include is necessary on many Unixes but not Linux.
  * It is not needed for Windows platforms.

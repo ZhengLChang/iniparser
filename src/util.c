@@ -1,4 +1,7 @@
 #include "util.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 /*-------------------------------------------------------------------------*/
 /**
   @brief    Convert a string to lowercase.

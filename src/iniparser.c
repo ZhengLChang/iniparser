@@ -733,10 +733,13 @@ dictionary * iniparser_load(const char * ininame)
             continue;
         /* Safety check against buffer overflows */
         if (line[len]!='\n' && !feof(in)) {
+        	log_error_write(dict->error_buf, lineno, "s", "iniparser: input line too long");
+        	#if 0
             iniparser_error_callback(
               "iniparser: input line too long in %s (%d)\n",
               ininame,
               lineno);
+        	#endif
             dictionary_del(dict);
             fclose(in);
             return NULL ;
@@ -773,11 +776,14 @@ dictionary * iniparser_load(const char * ininame)
             break ;
 
             case LINE_ERROR:
+            	log_error_write(dict->error_buf, lineno, "ss", "iniparser: syntax error -> ", line);
+#if 0
             iniparser_error_callback(
               "iniparser: syntax error in %s (%d):\n-> %s\n",
               ininame,
               lineno,
               line);
+#endif
             errs++ ;
             break;
 
@@ -787,14 +793,19 @@ dictionary * iniparser_load(const char * ininame)
         memset(line, 0, ASCIILINESZ);
         last=0;
         if (mem_err<0) {
+        	log_error_write(dict->error_buf, lineno, "s", "iniparser: memory allocation failure");
+#if 0
             iniparser_error_callback("iniparser: memory allocation failure\n");
+#endif
             break ;
         }
     }
+#if 0
     if (errs) {
         dictionary_del(dict);
         dict = NULL ;
     }
+#endif
     fclose(in);
     return dict ;
 }

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "util.h"
 
 /** Maximum value size for integers and doubles. */
@@ -146,6 +147,7 @@ dictionary * dictionary_new(size_t size)
         d->key  = (char**) calloc(size, sizeof *d->key);
         d->hash = (unsigned*) calloc(size, sizeof *d->hash);
         d->repeat = (int*) calloc(size, sizeof *d->repeat);
+        d->error_buf = buffer_init();
     }
     return d ;
 }
@@ -174,6 +176,7 @@ void dictionary_del(dictionary * d)
     free(d->key);
     free(d->hash);
     free(d->repeat);
+    buffer_free(d->error_buf);
     free(d);
     return ;
 }
@@ -375,6 +378,44 @@ void dictionary_dump(const dictionary * d, FILE * out)
     return ;
 }
 
+void dictionary_report_dump(const dictionary * d, FILE * out)
+{
+    ssize_t  i ;
+    int repeat = 0;
+    bool is_report_repeat = false;
+
+    if (d==NULL || out==NULL) return ;
+    if (d->n<1) {
+        fprintf(out, "empty dictionary\n");
+        return ;
+    }
+    fprintf(out, "Section Sum: %d\n", d->n);
+
+    for (i=0 ; i<d->n ; i++) {
+    	 if(d->repeat[i] > 1)
+    	 {
+    		 if(!is_report_repeat)
+    		 {
+    			 is_report_repeat = true;
+    			 fprintf(out, "\nWarning: File has some repeating section, Next is the Repeat\n\n");
+    		 }
+    		 repeat++;
+    		 fprintf(out, "%s\n", d->key[i]);
+    	 }
+    }
+#if 0
+    if(repeat > 0)
+    {
+    	fprintf(out, "Warning: \n\tFile has some repeating section\n");
+    }
+#endif
+    if(d->error_buf->used != 0)
+    {
+    	fprintf(out, "\nError: \n\n%s\n",
+    						d->error_buf->ptr);
+    }
+    return ;
+}
 
 /* Test code */
 #ifdef TESTDIC

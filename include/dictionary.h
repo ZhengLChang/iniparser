@@ -23,6 +23,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include "buffer.h"
 
 /*---------------------------------------------------------------------------
                                 New types
@@ -47,6 +48,7 @@ typedef struct _dictionary_ {
     char        **  key ;   /** List of string keys */
     unsigned     *  hash ;  /** List of hash values for keys */
     int             *repeat; /** Stat the same section = value */
+    buffer 		*error_buf;
 } dictionary ;
 
 

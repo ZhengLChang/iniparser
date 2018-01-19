@@ -4,5 +4,6 @@
 const char * strlwc(const char * in, char *out, unsigned len);
 char * xstrdup(const char * s);
 unsigned strstrip(char * s);
+#define UNUSED(x) ( (void)(x) )
 #define XISSPACE(tmp) (tmp>0 && tmp <255 && isspace(tmp))
 #endif

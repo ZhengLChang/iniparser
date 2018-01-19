@@ -8,7 +8,9 @@ MainFile=main.c
 OutPut=iniparser
 src=src/iniparser.c \
 	src/dictionary.c \
-	src/util.c
+	src/util.c \
+	src/log.c \
+	src/buffer.c
 target=$(patsubst %.c, %.o, ${MainFile})
 target+=$(patsubst %.c, %.o, ${src})
 springcleaning=$(patsubst %.c, %, $(wildcard ./*.c))
