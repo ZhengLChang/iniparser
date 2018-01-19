@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "util.h"
 
 /** Maximum value size for integers and doubles. */
 #define MAXVALSZ    1024
@@ -35,57 +36,6 @@
 
 /*-------------------------------------------------------------------------*/
 /**
-  @brief    Duplicate a string
-  @param    s String to duplicate
-  @return   Pointer to a newly allocated string, to be freed with free()
-
-  This is a replacement for strdup(). This implementation is provided
-  for systems that do not have it.
- */
-/*--------------------------------------------------------------------------*/
-static char * xstrdup(const char * s)
-{
-    char * t ;
-    size_t len ;
-    if (!s)
-        return NULL ;
-
-    len = strlen(s) + 1 ;
-    t = (char*) malloc(len) ;
-    if (t) {
-        memcpy(t, s, len) ;
-    }
-    return t ;
-}
-
-/*-------------------------------------------------------------------------*/
-/**
-  @brief    Convert a string to lowercase.
-  @param    s   String to convert.
-  @return   ptr to statically allocated string.
-
-  This function returns a pointer to a statically allocated string
-  containing a lowercased version of the input string. Do not free
-  or modify the returned string! Since the returned string is statically
-  allocated, it will be modified at each function call (not re-entrant).
- */
-/*--------------------------------------------------------------------------*/
-static const char * strlwc(const char * in, char *out, unsigned len)
-{
-    unsigned i ;
-
-    if (in==NULL || out == NULL || len==0) return NULL ;
-    i=0 ;
-    while (in[i] != '\0' && i < len-1) {
-        out[i] = (char)tolower((int)in[i]);
-        i++ ;
-    }
-    out[i] = '\0';
-    return out ;
-}
-
-/*-------------------------------------------------------------------------*/
-/**
   @brief    Double the size of the dictionary
   @param    d Dictionary to grow
   @return   This function returns non-zero in case of failure
@@ -96,11 +46,13 @@ static int dictionary_grow(dictionary * d)
     char        ** new_val ;
     char        ** new_key ;
     unsigned     * new_hash ;
+    int          * new_repeat ;
 
     new_val  = (char**) calloc(d->size * 2, sizeof *d->val);
     new_key  = (char**) calloc(d->size * 2, sizeof *d->key);
     new_hash = (unsigned*) calloc(d->size * 2, sizeof *d->hash);
-    if (!new_val || !new_key || !new_hash) {
+    new_repeat = (int*) calloc(d->size * 2, sizeof *d->repeat);
+    if (!new_val || !new_key || !new_hash || !new_repeat) {
         /* An allocation failed, leave the dictionary unchanged */
         if (new_val)
             free(new_val);
@@ -108,21 +60,26 @@ static int dictionary_grow(dictionary * d)
             free(new_key);
         if (new_hash)
             free(new_hash);
+        if(new_repeat)
+        	free(new_repeat);
         return -1 ;
     }
     /* Initialize the newly allocated space */
     memcpy(new_val, d->val, d->size * sizeof(char *));
     memcpy(new_key, d->key, d->size * sizeof(char *));
     memcpy(new_hash, d->hash, d->size * sizeof(unsigned));
+    memcpy(new_repeat, d->repeat, d->size * sizeof(int));
     /* Delete previous data */
     free(d->val);
     free(d->key);
     free(d->hash);
+    free(d->repeat);
     /* Actually update the dictionary */
     d->size *= 2 ;
     d->val = new_val;
     d->key = new_key;
     d->hash = new_hash;
+    d->repeat = new_repeat;
     return 0 ;
 }
 
@@ -188,6 +145,7 @@ dictionary * dictionary_new(size_t size)
         d->val  = (char**) calloc(size, sizeof *d->val);
         d->key  = (char**) calloc(size, sizeof *d->key);
         d->hash = (unsigned*) calloc(size, sizeof *d->hash);
+        d->repeat = (int*) calloc(size, sizeof *d->repeat);
     }
     return d ;
 }
@@ -215,6 +173,7 @@ void dictionary_del(dictionary * d)
     free(d->val);
     free(d->key);
     free(d->hash);
+    free(d->repeat);
     free(d);
     return ;
 }
@@ -304,6 +263,7 @@ int dictionary_set(dictionary * d, const char * key, const char * val)
                     if (d->val[i]!=NULL)
                         free(d->val[i]);
                     d->val[i] = (val ? xstrdup(val) : NULL);
+                    d->repeat[i]++;
                     /* Value has been modified: return */
                     return 0 ;
                 }
@@ -328,6 +288,7 @@ int dictionary_set(dictionary * d, const char * key, const char * val)
     d->key[i]  = xstrdup(key);
     d->val[i]  = (val ? xstrdup(val) : NULL) ;
     d->hash[i] = hash;
+    d->repeat[i]++;
     d->n ++ ;
     return 0 ;
 }
@@ -378,6 +339,7 @@ void dictionary_unset(dictionary * d, const char * key)
         d->val[i] = NULL ;
     }
     d->hash[i] = 0 ;
+    d->repeat[i] = 0 ;
     d->n -- ;
     return ;
 }
@@ -405,9 +367,9 @@ void dictionary_dump(const dictionary * d, FILE * out)
     }
     for (i=0 ; i<d->size ; i++) {
         if (d->key[i]) {
-            fprintf(out, "%20s\t[%s]\n",
+            fprintf(out, "%40s\t[%s]\t\t[repeat %d]\n",
                     d->key[i],
-                    d->val[i] ? d->val[i] : "UNDEF");
+                    d->val[i] ? d->val[i] : "UNDEF", d->repeat[i]);
         }
     }
     return ;
