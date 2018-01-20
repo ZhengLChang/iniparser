@@ -23,6 +23,8 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include "fcgi_config.h"
+#include "fcgi_stdio.h"
 #include "buffer.h"
 
 /*---------------------------------------------------------------------------

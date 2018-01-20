@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include "fcgi_config.h"
+#include "fcgi_stdio.h"
 #include "buffer.h"
 /*
  * The following #include is necessary on many Unixes but not Linux.
