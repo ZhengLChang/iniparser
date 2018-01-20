@@ -2,8 +2,8 @@
 CC=gcc
 INCLUDE=-I./include/
 LIB=-lpthread -lcrypto
-#CFLAGS=-g -Wall -Werror -D_REENTRANT ${LIB} ${INCLUDE}
-CFLAGS=-g ${LIB} ${INCLUDE}
+CFLAGS=-g -Wall -Werror -D_REENTRANT -D_GNU_SOURCE ${LIB} ${INCLUDE}
+#CFLAGS=-g ${LIB} ${INCLUDE}
 MainFile=main.c
 OutPut=iniparser
 src=src/iniparser.c \

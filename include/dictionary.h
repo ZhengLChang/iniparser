@@ -167,4 +167,5 @@ void dictionary_unset(dictionary * d, const char * key);
 /*--------------------------------------------------------------------------*/
 void dictionary_dump(const dictionary * d, FILE * out);
 
+void dictionary_report_dump(const dictionary * d, FILE * out);
 #endif

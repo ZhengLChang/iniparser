@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
@@ -39,9 +38,9 @@ buffer *buffer_init_buffer(const buffer *src) {
 buffer *buffer_init_printf (const char *fmt, ...)
 {
   /* Use vasprintf. */
-  int ret;
+  int ret = 0;
   va_list args;
-  char *str;
+  char *str = NULL;
   buffer *b = NULL;
   va_start (args, fmt);
   ret = vasprintf (&str, fmt, args);

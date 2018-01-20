@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include "iniparser.h"
 #include "util.h"
+#include "log.h"
 
 /*---------------------------- Defines -------------------------------------*/
 #define ASCIILINESZ         (1024)
@@ -345,6 +346,7 @@ const char * iniparser_getstring(const dictionary * d, const char * key, const c
     if (d==NULL || key==NULL)
         return def ;
 
+    UNUSED(lc_key);
 /*    lc_key = strlwc(key, tmp_str, sizeof(tmp_str));*/
     sval = dictionary_get(d, key, def);
     return sval ;
